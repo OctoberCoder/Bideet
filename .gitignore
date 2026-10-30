@@ -30,8 +30,15 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# env files / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*secret*
+*credential*
 
 # typescript
 *.tsbuildinfo
@@ -39,3 +46,11 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# AI / editor tooling — not part of the product
+.claude/
+.cursor/
+.windsurf/
+AGENTS.md
+CLAUDE.md
+*.agent.md
