@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Bideet",
-    "slug": "bideet-app",
+    "slug": "bideet",
     "version": "1.0.0",
     "scheme": "bideetapp",
     "orientation": "portrait",
@@ -26,10 +26,15 @@
     },
     "extra": {
       "eas": {
-        "projectId": "e3a51954-ba73-4b29-b430-a21e523c4c9e"
+        "projectId": "5cd7921f-89a6-4d8b-8004-5413426966e5"
+      },
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
       }
     },
-    "owner": "luxry",
+    "owner": "bideet-team",
     "plugins": [
       "expo-sqlite",
       "expo-router",
