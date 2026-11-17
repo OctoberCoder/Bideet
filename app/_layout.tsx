@@ -16,6 +16,9 @@ export default function RootLayout() {
           <Stack.Screen name="login" options={{ title: 'Log in', presentation: 'modal' }} />
           <Stack.Screen name="managed" options={{ title: 'Auctions you host' }} />
           <Stack.Screen name="orders" options={{ title: 'My orders' }} />
+          <Stack.Screen name="catalogue/index" options={{ title: 'My catalogue' }} />
+          <Stack.Screen name="catalogue/new" options={{ title: 'Add product', presentation: 'modal' }} />
+          <Stack.Screen name="catalogue/[id]" options={{ title: 'Edit product', presentation: 'modal' }} />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>
