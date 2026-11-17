@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -13,7 +12,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAuctions } from '../hooks/useAuctions';
 import { useAuth } from '../auth/AuthContext';
-import { getErrorMessage } from '../api/client';
 import { formatAuctionWindow, formatNaira } from '../utils/format';
 import type { Auction } from '../types/auction';
 
@@ -61,34 +59,7 @@ export default function AuctionListingScreen() {
     isAdmin,
     isLoading: authLoading,
     logout,
-    becomeSeller,
-    becomeAuctionManager,
   } = useAuth();
-  const [upgrading, setUpgrading] = React.useState<'seller' | 'auction_manager' | null>(null);
-
-  async function handleBecomeSeller() {
-    setUpgrading('seller');
-    try {
-      await becomeSeller();
-      Alert.alert('You can now sell', 'Look for the + button to create your first auction.');
-    } catch (err) {
-      Alert.alert('Could not start selling', getErrorMessage(err, 'Something went wrong. Try again.'));
-    } finally {
-      setUpgrading(null);
-    }
-  }
-
-  async function handleBecomeAuctionManager() {
-    setUpgrading('auction_manager');
-    try {
-      await becomeAuctionManager();
-      Alert.alert('You are now a host', 'Open "My hosting" to see auctions assigned to you.');
-    } catch (err) {
-      Alert.alert('Could not become a host', getErrorMessage(err, 'Something went wrong. Try again.'));
-    } finally {
-      setUpgrading(null);
-    }
-  }
 
   if (loading && auctions.length === 0) {
     return (
@@ -128,32 +99,6 @@ export default function AuctionListingScreen() {
             {isAdmin && (
               <Pressable style={styles.authButton} onPress={() => router.push('/admin')}>
                 <Text style={styles.authButtonText}>Admin</Text>
-              </Pressable>
-            )}
-            {!isSeller && (
-              <Pressable
-                style={styles.authButton}
-                onPress={handleBecomeSeller}
-                disabled={upgrading !== null}
-              >
-                {upgrading === 'seller' ? (
-                  <ActivityIndicator size="small" color="#2563eb" />
-                ) : (
-                  <Text style={styles.authButtonText}>Start selling</Text>
-                )}
-              </Pressable>
-            )}
-            {!isAuctionManager && (
-              <Pressable
-                style={styles.authButton}
-                onPress={handleBecomeAuctionManager}
-                disabled={upgrading !== null}
-              >
-                {upgrading === 'auction_manager' ? (
-                  <ActivityIndicator size="small" color="#2563eb" />
-                ) : (
-                  <Text style={styles.authButtonText}>Become a host</Text>
-                )}
               </Pressable>
             )}
             <Pressable style={styles.authButton} onPress={() => logout()}>
