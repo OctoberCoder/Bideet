@@ -27,15 +27,6 @@ export function fetchAuctionById(id: string): Promise<Auction> {
   return apiClient.get<Auction>(`/auctions/${id}`);
 }
 
-export function fetchMyAuctions(): Promise<Auction[]> {
-  return apiClient.get<Auction[]>('/auctions/mine');
-}
-
-/** Fetches one of the current seller's own auctions regardless of status (e.g. a draft). */
-export function fetchMyAuctionById(id: string): Promise<Auction> {
-  return apiClient.get<Auction>(`/auctions/mine/${id}`);
-}
-
 export function createAuction(input: AuctionFormInput): Promise<Auction> {
   return apiClient.post<Auction>('/auctions', input);
 }
@@ -50,23 +41,6 @@ export function transitionAuctionStatus(id: string, status: AuctionStatus): Prom
 
 export function deleteAuction(id: string): Promise<void> {
   return apiClient.delete<void>(`/auctions/${id}`);
-}
-
-/** Seller-only: assigns (or, with null, clears) the auction manager hosting this auction. */
-export function assignAuctionManager(id: string, auctionManagerId: string | null): Promise<Auction> {
-  return apiClient.patch<Auction>(`/auctions/${id}/manager`, { auctionManagerId });
-}
-
-export interface AuctionManagerProfile {
-  id: string;
-  fullName: string;
-}
-
-/** Resolves an auction manager's account by email for assignment — 404 if no such manager exists. */
-export function lookupAuctionManagerByEmail(email: string): Promise<AuctionManagerProfile> {
-  return apiClient.get<AuctionManagerProfile>(
-    `/users/lookup/auction-manager?email=${encodeURIComponent(email)}`,
-  );
 }
 
 /** Auctions the current user has been assigned to host as auction manager. */

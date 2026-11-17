@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-import { fetchAuctionById, fetchManagedAuctionById, fetchMyAuctionById } from '../api/auctions';
+import { fetchAuctionById, fetchManagedAuctionById } from '../api/auctions';
 import { ApiError } from '../api/client';
 import { cacheAuction, getCachedAuction } from '../db/database';
 import { useAuth } from '../auth/AuthContext';
@@ -9,7 +9,7 @@ import type { Auction } from '../types/auction';
 const isNative = Platform.OS !== 'web';
 
 export function useAuctionDetail(id: string) {
-  const { user, isSeller, isAuctionManager } = useAuth();
+  const { user } = useAuth();
   const [auction, setAuction] = useState<Auction | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,21 +32,16 @@ export function useAuctionDetail(id: string) {
       try {
         fresh = await fetchAuctionById(id);
       } catch (err) {
-        // Not-yet-published (e.g. a draft) 404s on the public endpoint — fall
-        // back to a role-scoped lookup: seller's own, then assigned manager's.
+        // A draft 404s on the public endpoint. Its manager (the creator) can
+        // still load it; for anyone else the manager lookup is refused and the
+        // original 404 stands. Authority comes from the auction, not the account.
         if (!(err instanceof ApiError && err.status === 404 && user)) throw err;
-
-        if (isSeller) {
-          try {
-            fresh = await fetchMyAuctionById(id);
-          } catch (ownedErr) {
-            if (!(ownedErr instanceof ApiError && ownedErr.status === 404)) throw ownedErr;
-          }
-        }
-        if (!fresh && isAuctionManager) {
+        try {
           fresh = await fetchManagedAuctionById(id);
+        } catch (managedErr) {
+          if (managedErr instanceof ApiError && (managedErr.status === 403 || managedErr.status === 404)) throw err;
+          throw managedErr;
         }
-        if (!fresh) throw err;
       }
       setAuction(fresh);
       setIsShowingCache(false);
@@ -63,7 +58,7 @@ export function useAuctionDetail(id: string) {
     } finally {
       setLoading(false);
     }
-  }, [id, user, isSeller, isAuctionManager]);
+  }, [id, user]);
 
   useEffect(() => {
     load();
