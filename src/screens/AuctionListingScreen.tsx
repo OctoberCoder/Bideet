@@ -117,6 +117,9 @@ export default function AuctionListingScreen() {
             <Pressable style={styles.authButton} onPress={() => router.push('/orders')}>
               <Text style={styles.authButtonText}>My orders</Text>
             </Pressable>
+            <Pressable style={styles.authButton} onPress={() => router.push('/catalogue')}>
+              <Text style={styles.authButtonText}>My catalogue</Text>
+            </Pressable>
             {isAuctionManager && (
               <Pressable style={styles.authButton} onPress={() => router.push('/managed')}>
                 <Text style={styles.authButtonText}>My hosting</Text>
