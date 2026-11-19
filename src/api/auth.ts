@@ -16,7 +16,3 @@ export function register(email: string, password: string, fullName: string): Pro
 export function logout(): Promise<void> {
   return apiClient.post<void>('/auth/logout');
 }
-
-export function addRole(role: string): Promise<unknown> {
-  return apiClient.post('/users/me/roles', { role });
-}

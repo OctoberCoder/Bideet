@@ -3,9 +3,8 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import AuctionForm from '../components/AuctionForm';
-import AssignManagerCard from '../components/AssignManagerCard';
 import KeyboardScreen from '../components/KeyboardScreen';
-import { fetchMyAuctionById, transitionAuctionStatus, updateAuction } from '../api/auctions';
+import { fetchManagedAuctionById, transitionAuctionStatus, updateAuction } from '../api/auctions';
 import { getErrorMessage } from '../api/client';
 import type { Auction } from '../types/auction';
 import type { AuctionFormInput } from '../api/auctions';
@@ -20,7 +19,7 @@ export default function EditAuctionScreen({ auctionId }: { auctionId: string }) 
   useEffect(() => {
     (async () => {
       try {
-        const data = await fetchMyAuctionById(auctionId);
+        const data = await fetchManagedAuctionById(auctionId);
         setAuction(data);
       } catch (err) {
         setLoadError(getErrorMessage(err, 'Failed to load auction'));
@@ -76,8 +75,6 @@ export default function EditAuctionScreen({ auctionId }: { auctionId: string }) 
     );
   }
 
-  const canAssignManager = auction.status !== 'completed' && auction.status !== 'cancelled';
-
   // Terms are locked once an auction is published (PRD 8.2: explicit state transitions
   // only) — the backend rejects a PATCH here, so editing is offered only for drafts.
   if (auction.status !== 'draft') {
@@ -99,9 +96,6 @@ export default function EditAuctionScreen({ auctionId }: { auctionId: string }) 
               )}
             </Pressable>
           </View>
-          {canAssignManager && (
-            <AssignManagerCard auction={auction} onAssigned={setAuction} />
-          )}
         </KeyboardScreen>
       </SafeAreaView>
     );
@@ -110,7 +104,6 @@ export default function EditAuctionScreen({ auctionId }: { auctionId: string }) 
   return (
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
       <KeyboardScreen contentContainerStyle={styles.draftWrapper}>
-        <AssignManagerCard auction={auction} onAssigned={setAuction} />
         <AuctionForm
           initial={auction}
           submitLabel="Save changes"

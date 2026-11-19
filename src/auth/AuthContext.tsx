@@ -1,9 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import * as authApi from '../api/auth';
-import { apiClient, setAccessToken, registerSessionExpiredHandler } from '../api/client';
+import { setAccessToken, registerSessionExpiredHandler } from '../api/client';
 import { clearTokens, loadTokens, saveTokens } from './tokenStorage';
 import { decodeJwt, isExpired } from './decodeJwt';
-import type { AuthTokens } from '../api/auth';
 
 interface AuthUser {
   userId: string;
@@ -14,14 +13,10 @@ interface AuthUser {
 interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;
-  isSeller: boolean;
-  isAuctionManager: boolean;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, fullName: string) => Promise<void>;
   logout: () => Promise<void>;
-  becomeSeller: () => Promise<void>;
-  becomeAuctionManager: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -86,37 +81,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
-  const grantSelfRole = useCallback(
-    async (role: string) => {
-      await authApi.addRole(role);
-      // The access token's role claims are stale until refreshed — the backend
-      // re-reads the user's current roles from the DB on every /auth/refresh,
-      // so forcing one here gets us a token carrying the new role immediately.
-      const stored = await loadTokens();
-      if (!stored) return;
-      const tokens = await apiClient.post<AuthTokens>('/auth/refresh', { refreshToken: stored.refreshToken });
-      await applyTokens(tokens);
-    },
-    [applyTokens],
-  );
-
-  const becomeSeller = useCallback(() => grantSelfRole('seller'), [grantSelfRole]);
-  const becomeAuctionManager = useCallback(() => grantSelfRole('auction_manager'), [grantSelfRole]);
-
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       isLoading,
-      isSeller: user?.roles.includes('seller') ?? false,
-      isAuctionManager: user?.roles.includes('auction_manager') ?? false,
       isAdmin: user?.roles.includes('bideet_admin') ?? false,
       login,
       register: registerAccount,
       logout,
-      becomeSeller,
-      becomeAuctionManager,
     }),
-    [user, isLoading, login, registerAccount, logout, becomeSeller, becomeAuctionManager],
+    [user, isLoading, login, registerAccount, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
